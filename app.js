@@ -21,10 +21,9 @@ t1.fromTo(hero, 1, { height: "0%" }, { height: "80%", ease: Power2.easeInOut })
     { x: "0%", ease: Power2.easeInOut },
     "-=1.2"
   )
-  .fromTo(logo, .5, { opacity: 0, x: 30 }, { opacity: 1, x: 0 }, "-=.5")
+  .fromTo(logo, 0.5, { opacity: 0, x: 30 }, { opacity: 1, x: 0 }, "-=.5")
   .fromTo(hamburger, 1, { opacity: 0, x: 30 }, { opacity: 1, x: 0 }, "-=.5")
   .fromTo(headline, 1, { opacity: 0, x: 240 }, { opacity: 1, x: 0 }, "-=.5");
-
 
 // ================== Emoji Animations ================= //
 console.clear();
@@ -36,6 +35,7 @@ const body = document.body;
 const theButton = document.querySelector(".hamburger");
 const theWrapper = document.querySelector(".hero");
 
+// functions to create randomness
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
 }
@@ -44,20 +44,24 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// emojis which would be generated onto the page
 const enjoymojis = ["🍬", "🍫", "🍭", "🥤", "💰", "🍪", "🍕"];
 const enjoys = [];
 const radius = 15;
 
-const Cd = 0.42; // Dimensionless
-const rho = 1.55; // kg / m^3
-const A = Math.PI * radius * radius / 10000; // m^2
-const ag = 9.81; // m / s^2
+// physics which the emojis will be bound
+const Cd = 0.42;
+const rho = 1.55;
+const A = (Math.PI * radius * radius) / 10000;
+const ag = 9.81;
 const frameRate = 1 / 60;
 
-function createEnjoy() /* create a enjoy */ {
+// function to create the animations
+function createEnjoy() {
   const vx = getRandomArbitrary(-10, 10); // x velocity
-  const vy = getRandomArbitrary(-10, 1);  // y velocity
-  
+  const vy = getRandomArbitrary(-10, 1); // y velocity
+
+  // DOM being manipulated
   const el = document.createElement("div");
   el.className = "enjoy";
 
@@ -65,7 +69,7 @@ function createEnjoy() /* create a enjoy */ {
   inner.className = "inner";
   inner.innerText = enjoymojis[getRandomInt(0, enjoymojis.length - 1)];
   el.appendChild(inner);
-  
+
   theWrapper.appendChild(el);
 
   const rect = el.getBoundingClientRect();
@@ -79,10 +83,10 @@ function createEnjoy() /* create a enjoy */ {
     absolutePosition: { x: rect.left, y: rect.top },
     position: { x: rect.left, y: rect.top },
     velocity: { x: vx, y: vy },
-    mass: 0.1, //kg
-    radius: el.offsetWidth, // 1px = 1cm
-    restitution: -.55,
-    
+    mass: 0.1,
+    radius: el.offsetWidth,
+    restitution: -0.55,
+
     lifetime,
     direction: vx > 0 ? 1 : -1,
 
@@ -96,44 +100,43 @@ function createEnjoy() /* create a enjoy */ {
     animate() {
       const enjoy = this;
       let Fx =
-        -0.5 *
-        Cd *
-        A *
-        rho *
-        enjoy.velocity.x *
-        enjoy.velocity.x *
-        enjoy.velocity.x /
+        (-0.5 *
+          Cd *
+          A *
+          rho *
+          enjoy.velocity.x *
+          enjoy.velocity.x *
+          enjoy.velocity.x) /
         Math.abs(enjoy.velocity.x);
       let Fy =
-        -0.5 *
-        Cd *
-        A *
-        rho *
-        enjoy.velocity.y *
-        enjoy.velocity.y *
-        enjoy.velocity.y /
+        (-0.5 *
+          Cd *
+          A *
+          rho *
+          enjoy.velocity.y *
+          enjoy.velocity.y *
+          enjoy.velocity.y) /
         Math.abs(enjoy.velocity.y);
 
       Fx = isNaN(Fx) ? 0 : Fx;
       Fy = isNaN(Fy) ? 0 : Fy;
 
-      // Calculate acceleration ( F = ma )
+      // calculate acceleration ( F = ma )
       var ax = Fx / enjoy.mass;
       var ay = ag + Fy / enjoy.mass;
-      // Integrate to get velocity
+      // integrate to get velocity
       enjoy.velocity.x += ax * frameRate;
       enjoy.velocity.y += ay * frameRate;
 
-      // Integrate to get position
+      // integrate to get position
       enjoy.position.x += enjoy.velocity.x * frameRate * 100;
       enjoy.position.y += enjoy.velocity.y * frameRate * 100;
-      
+
       enjoy.checkBounds();
       enjoy.update();
     },
-    
-    checkBounds() {
 
+    checkBounds() {
       if (enjoy.position.y > height - enjoy.radius) {
         enjoy.velocity.y *= enjoy.restitution;
         enjoy.position.y = height - enjoy.radius;
@@ -148,7 +151,6 @@ function createEnjoy() /* create a enjoy */ {
         enjoy.position.x = enjoy.radius;
         enjoy.direction = 1;
       }
-
     },
 
     update() {
@@ -167,7 +169,6 @@ function createEnjoy() /* create a enjoy */ {
 
   return enjoy;
 }
-
 
 function animationLoop() {
   var i = enjoys.length;
@@ -193,8 +194,8 @@ function addEnjoys() {
   }
 }
 
-theButton.addEventListener("click", addEnjoys);
-theButton.click();
+theButton.addEventListener("click", addEnjoys); // clicking the button results in the emojis animation
+theButton.click(); // to sprout some emojis on load
 
 window.addEventListener("resize", () => {
   width = window.innerWidth;
